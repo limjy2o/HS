@@ -507,13 +507,19 @@ function shuffle(arr) {
 
 function startQuiz() {
     const selected = getSelectedBankNames();
+    console.log('[VTS] selected banks:', selected);
+    console.log('[VTS] STATE.banks keys:', Object.keys(STATE.banks));
     if (!selected.length) { showMessage('請至少選擇一個題庫'); return; }
 
     const mode = document.querySelector('input[name="count_mode"]:checked')?.value || '30';
     const testMode = document.querySelector('input[name="test_mode"]:checked')?.value || 'A';
 
     let all = [];
-    for (const n of selected) if (STATE.banks[n]) all = all.concat(STATE.banks[n]);
+    for (const n of selected) {
+        console.log('[VTS] bank lookup:', n, '→', STATE.banks[n]?.length ?? 'NOT FOUND');
+        if (STATE.banks[n]) all = all.concat(STATE.banks[n]);
+    }
+    console.log('[VTS] all questions:', all.length, 'count will be:', Math.min(30, all.length));
 
     let count;
     if (mode === 'custom') {
@@ -531,7 +537,9 @@ function startQuiz() {
     }));
     STATE.quizStartTime = Date.now();
     updateActivity();
+    console.log('[VTS] quizQuestions length:', STATE.quizQuestions.length);
     renderQuiz();
+    console.log('[VTS] calling showPage quiz');
     showPage('quiz');
 }
 
