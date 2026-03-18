@@ -6,351 +6,182 @@
     <title>VTS</title>
     <style>
         :root {
-            --bg:        #ffffff;
-            --text:      #000000;
-            --border:    #d0d0d0;
-            --hover:     #f5f5f5;
-            --section:   #fafafa;
-            --correct:   #2e7d32;
-            --incorrect: #c62828;
-            --input-bg:  #ffffff;
-            --header-bg: #fafafa;
+            --bg: #ffffff; --text: #000000; --border: #d0d0d0;
+            --hover: #f5f5f5; --section: #fafafa;
+            --correct: #2e7d32; --incorrect: #c62828;
+            --input-bg: #ffffff; --header-bg: #fafafa;
         }
         [data-theme="dark"] {
-            --bg:        #1a1a1a;
-            --text:      #ffffff;
-            --border:    #404040;
-            --hover:     #2a2a2a;
-            --section:   #222222;
-            --correct:   #66bb6a;
-            --incorrect: #ef5350;
-            --input-bg:  #2a2a2a;
-            --header-bg: #222222;
+            --bg: #1a1a1a; --text: #ffffff; --border: #404040;
+            --hover: #2a2a2a; --section: #222222;
+            --correct: #66bb6a; --incorrect: #ef5350;
+            --input-bg: #2a2a2a; --header-bg: #222222;
         }
-
         * { margin: 0; padding: 0; box-sizing: border-box; }
-
         body {
             font-family: "Microsoft JhengHei", "微軟正黑體", sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            line-height: 1.6;
-            transition: background-color 0.3s, color 0.3s;
+            background: var(--bg); color: var(--text);
+            line-height: 1.6; transition: background-color 0.3s, color 0.3s;
         }
 
-        /* ── Page routing ── */
-        .page        { display: none; }
+        /* Pages */
+        .page { display: none; }
         .page.active { display: block; }
 
-        /* ── Shared ── */
+        /* Shared */
         .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px 0;
-            border-bottom: 2px solid var(--border);
-            margin-bottom: 30px;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 20px 0; border-bottom: 2px solid var(--border); margin-bottom: 30px;
         }
         .header h1 { font-size: 2rem; font-weight: bold; }
-
         .theme-toggle {
-            padding: 8px 16px;
-            background: var(--bg);
-            color: var(--text);
-            border: 1px solid var(--border);
-            cursor: pointer;
-            font-size: 1rem;
-            font-family: inherit;
+            padding: 8px 16px; background: var(--bg); color: var(--text);
+            border: 1px solid var(--border); cursor: pointer; font-size: 1rem; font-family: inherit;
         }
         .theme-toggle:hover { background: var(--hover); }
-
         .btn {
-            padding: 10px 20px;
-            font-size: 1rem;
-            border: 1px solid var(--border);
-            background: var(--bg);
-            color: var(--text);
-            cursor: pointer;
-            font-family: inherit;
+            padding: 10px 20px; font-size: 1rem; border: 1px solid var(--border);
+            background: var(--bg); color: var(--text); cursor: pointer; font-family: inherit;
         }
         .btn:hover { background: var(--hover); }
-
         .btn-primary {
-            background: var(--text);
-            color: var(--bg);
-            border-color: var(--text);
-            font-size: 1.05rem;
-            padding: 12px 35px;
+            background: var(--text); color: var(--bg); border-color: var(--text);
+            font-size: 1.05rem; padding: 12px 35px;
         }
         .btn-primary:hover { opacity: 0.85; }
-
-        .btn-large {
-            font-size: 1.2rem;
-            padding: 12px 40px;
-            background: var(--text);
-            color: var(--bg);
-            border-color: var(--text);
-        }
+        .btn-large { font-size: 1.2rem; padding: 12px 40px; background: var(--text); color: var(--bg); border-color: var(--text); }
         .btn-large:hover { opacity: 0.85; }
-
         .btn-danger { background: var(--bg); color: var(--text); border: 1px solid var(--text); }
         .btn-danger:hover { background: var(--text); color: var(--bg); }
-
         .section {
-            background: var(--section);
-            border: 1px solid var(--border);
-            padding: 25px;
-            margin-bottom: 25px;
+            background: var(--section); border: 1px solid var(--border);
+            padding: 25px; margin-bottom: 25px;
         }
         .section-title {
-            font-size: 1.3rem;
-            font-weight: bold;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid var(--border);
+            font-size: 1.3rem; font-weight: bold; margin-bottom: 20px;
+            padding-bottom: 10px; border-bottom: 1px solid var(--border);
         }
-
         .message {
-            display: none;
-            padding: 15px;
-            border: 1px solid var(--border);
-            margin-bottom: 20px;
-            background: var(--section);
+            padding: 15px; border: 1px solid var(--border);
+            margin-bottom: 20px; display: none; background: var(--section);
         }
         .message.show { display: block; }
-
         .separator { font-weight: bold; opacity: 0.6; }
 
-        /* ── Home ── */
+        /* Home */
         #page-home { padding: 20px; }
         #page-home .container { max-width: 1000px; margin: 0 auto; }
-
         .upload-area {
-            text-align: center;
-            padding: 30px;
-            background: var(--bg);
-            border: 2px dashed var(--border);
-            margin-bottom: 20px;
-            cursor: pointer;
+            text-align: center; padding: 30px; background: var(--bg);
+            border: 2px dashed var(--border); margin-bottom: 20px; cursor: pointer;
         }
         .upload-area:hover { background: var(--hover); }
-
         #fileInput { display: none; }
-
+        .bank-list { display: grid; gap: 10px; }
         .bank-item {
-            background: var(--bg);
-            padding: 15px;
-            border: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            background: var(--bg); padding: 15px; border: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center;
         }
-
         .checkbox-group {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 10px;
-            margin-bottom: 20px;
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 10px; margin-bottom: 20px;
         }
         .checkbox-label {
-            display: flex;
-            align-items: center;
-            padding: 10px;
-            background: var(--bg);
-            border: 1px solid var(--border);
-            cursor: pointer;
-            transition: background-color 0.2s;
+            display: flex; align-items: center; padding: 10px;
+            background: var(--bg); border: 1px solid var(--border);
+            cursor: pointer; transition: background-color 0.2s;
         }
-        .checkbox-label:hover    { background: var(--hover); }
+        .checkbox-label:hover { background: var(--hover); }
         .checkbox-label.selected { background: var(--hover); border-color: var(--text); }
-        .checkbox-label input[type="checkbox"] {
-            margin-right: 10px;
-            width: 18px;
-            height: 18px;
-            cursor: pointer;
-        }
-
+        .checkbox-label input[type="checkbox"] { margin-right: 10px; width: 18px; height: 18px; cursor: pointer; }
         .radio-group { display: flex; gap: 20px; flex-wrap: wrap; margin: 15px 0; }
         .radio-label { display: flex; align-items: center; cursor: pointer; }
-        .radio-label input[type="radio"] {
-            margin-right: 8px;
-            width: 18px;
-            height: 18px;
-            cursor: pointer;
-        }
-
+        .radio-label input[type="radio"] { margin-right: 8px; width: 18px; height: 18px; cursor: pointer; }
         .custom-input {
-            width: 100px;
-            padding: 8px;
-            border: 1px solid var(--border);
-            background: var(--bg);
-            color: var(--text);
-            font-size: 1rem;
-            margin-left: 10px;
-            font-family: inherit;
+            width: 100px; padding: 8px; border: 1px solid var(--border);
+            background: var(--bg); color: var(--text); font-size: 1rem; margin-left: 10px; font-family: inherit;
         }
-
-        .info-text    { margin-top: 15px; font-size: 1rem; font-weight: bold; }
+        .info-text { margin-top: 15px; font-size: 1rem; font-weight: bold; }
         .start-button { text-align: center; margin-top: 30px; }
 
-        /* ── Quiz ── */
+        /* Quiz */
         #page-quiz .quiz-header {
-            position: sticky;
-            top: 0;
-            background: var(--header-bg);
-            border-bottom: 1px solid var(--border);
-            padding: 15px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 100;
+            position: sticky; top: 0; background: var(--header-bg);
+            border-bottom: 1px solid var(--border); padding: 15px 20px;
+            display: flex; justify-content: space-between; align-items: center; z-index: 100;
         }
         #page-quiz .quiz-header-left { display: flex; align-items: center; gap: 20px; }
-        #page-quiz .quiz-header h1   { font-size: 1.3rem; font-weight: normal; }
-
+        #page-quiz .quiz-header h1 { font-size: 1.3rem; font-weight: normal; }
         .progress-info { font-size: 0.95rem; opacity: 0.7; }
-        .quiz-body     { max-width: 1400px; margin: 0 auto; padding: 30px 20px; }
-
+        .quiz-body { max-width: 1400px; margin: 0 auto; padding: 30px 20px; }
         .button-container {
-            position: sticky;
-            bottom: 0;
-            background: var(--header-bg);
-            border-top: 1px solid var(--border);
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-top: 30px;
+            position: sticky; bottom: 0; background: var(--header-bg);
+            border-top: 1px solid var(--border); padding: 20px;
+            display: flex; justify-content: center; gap: 15px; margin-top: 30px;
         }
-
         .question-card {
-            background: var(--bg);
-            border: 1px solid var(--border);
-            margin-bottom: 20px;
-            padding: 25px;
+            background: var(--bg); border: 1px solid var(--border);
+            margin-bottom: 20px; padding: 25px;
         }
         .question-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid var(--border);
         }
         .question-number { font-size: 1.1rem; font-weight: bold; }
         .question-source { font-size: 0.85rem; opacity: 0.5; font-family: monospace; }
-
         .question-content {
-            display: grid;
-            grid-template-columns: 1fr 1fr 2fr;
-            gap: 20px;
-            align-items: start;
+            display: grid; grid-template-columns: 1fr 1fr 2fr; gap: 20px; align-items: start;
         }
-        @media (max-width: 900px) {
-            .question-content { grid-template-columns: 1fr; }
-        }
-
+        @media (max-width: 900px) { .question-content { grid-template-columns: 1fr; } }
         .field-group { display: flex; flex-direction: column; gap: 8px; }
         .field-label { font-weight: bold; font-size: 0.95rem; opacity: 0.8; }
-        .input-group { display: flex; flex-direction: column; gap: 10px; }
-        .input-row   { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-        .input-small { flex: 0 0 120px; }
-
         .input-field {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid var(--border);
-            background: var(--input-bg);
-            color: var(--text);
-            font-size: 1rem;
-            font-family: inherit;
-            transition: border-color 0.2s;
+            width: 100%; padding: 10px; border: 1px solid var(--border);
+            background: var(--input-bg); color: var(--text); font-size: 1rem;
+            font-family: inherit; transition: border-color 0.2s;
         }
         .input-field:focus { outline: none; border-color: var(--text); }
+        .input-group { display: flex; flex-direction: column; gap: 10px; }
+        .input-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .input-small { flex: 0 0 120px; }
+        .word-display { font-family: "Merriweather", Georgia, serif; font-size: 1.2rem; font-weight: 500; }
 
-        .word-display {
-            font-family: "Merriweather", Georgia, serif;
-            font-size: 1.2rem;
-            font-weight: 500;
-        }
-
-        /* ── Result ── */
-        #page-result            { padding: 20px; }
+        /* Result */
+        #page-result { padding: 20px; }
         #page-result .container { max-width: 1200px; margin: 0 auto; }
-
-        .stats {
-            background: var(--section);
-            border: 1px solid var(--border);
-            padding: 25px;
-            margin-bottom: 30px;
-        }
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }
-        .stat-item {
-            background: var(--bg);
-            padding: 20px;
-            border: 1px solid var(--border);
-            text-align: center;
-        }
+        .stats { background: var(--section); border: 1px solid var(--border); padding: 25px; margin-bottom: 30px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-top: 20px; }
+        .stat-item { background: var(--bg); padding: 20px; border: 1px solid var(--border); text-align: center; }
         .stat-value { font-size: 2rem; font-weight: bold; margin-bottom: 5px; }
         .stat-label { font-size: 1rem; opacity: 0.7; }
-
         .result-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
         .result-table th {
-            background: var(--section);
-            padding: 12px;
-            text-align: center;
-            font-weight: bold;
-            border: 1px solid var(--border);
+            background: var(--section); padding: 12px; text-align: center;
+            font-weight: bold; border: 1px solid var(--border);
         }
-        .result-table td {
-            padding: 10px 12px;
-            border: 1px solid var(--border);
-            vertical-align: middle;
-        }
-
-        .question-num {
-            text-align: center;
-            vertical-align: middle;
-            min-width: 56px;
-            width: 56px;
-            padding: 10px 6px;
-        }
-        .question-num-inner {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 4px;
-        }
-        .num-top    { font-size: 1.2rem; font-weight: bold; line-height: 1; }
+        .result-table td { padding: 10px 12px; border: 1px solid var(--border); vertical-align: middle; }
+        .question-num { text-align: center; vertical-align: middle; min-width: 56px; width: 56px; padding: 10px 6px; }
+        .question-num-inner { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
+        .num-top { font-size: 1.2rem; font-weight: bold; line-height: 1; }
         .num-bottom { font-size: 0.7rem; color: #888; font-weight: normal; line-height: 1.2; }
-
-        .word-cell    { min-width: 150px; }
-        .pos-cell     { min-width: 150px; }
+        .word-cell { min-width: 150px; }
+        .pos-cell { min-width: 150px; }
         .meaning-cell { min-width: 250px; }
-
-        .user-answer-row              { background: var(--section); }
-        .correct-answer-row           { font-weight: bold; background: var(--bg); }
-        .correct-answer-row.correct   { color: var(--correct); }
+        .user-answer-row { background: var(--section); }
+        .correct-answer-row { font-weight: bold; background: var(--bg); }
+        .correct-answer-row.correct { color: var(--correct); }
         .correct-answer-row.incorrect { color: var(--incorrect); }
-
-        .status-cell            { text-align: center; font-weight: bold; font-size: 1rem; }
-        .status-cell.correct    { color: var(--correct); }
-        .status-cell.incorrect  { color: var(--incorrect); }
-
-        .answer-display       { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .status-cell { text-align: center; font-weight: bold; font-size: 1rem; }
+        .status-cell.correct { color: var(--correct); }
+        .status-cell.incorrect { color: var(--incorrect); }
+        .answer-display { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .button-group { display: flex; justify-content: center; gap: 20px; margin: 40px 0; }
         .result-section-title { font-size: 1.3rem; font-weight: bold; margin: 30px 0 20px 0; }
-        .button-group         { display: flex; justify-content: center; gap: 20px; margin: 40px 0; }
     </style>
 </head>
 <body>
 
-<!-- ── HOME ── -->
+<!-- ══ HOME ══ -->
 <div id="page-home" class="page active">
     <div class="container">
         <div class="header">
@@ -374,28 +205,14 @@
                 <div class="section-title">題庫選擇</div>
                 <p style="margin-bottom:15px;font-weight:bold;">選擇要使用的題庫:</p>
                 <div class="checkbox-group" id="bankCheckboxGroup"></div>
-
                 <p style="margin-top:20px;margin-bottom:15px;font-weight:bold;">題數選擇:</p>
                 <div class="radio-group">
+                    <label class="radio-label"><input type="radio" name="count_mode" value="30" checked onchange="toggleCustomInput();updateQuestionCount()"> 30 題</label>
+                    <label class="radio-label"><input type="radio" name="count_mode" value="40" onchange="toggleCustomInput();updateQuestionCount()"> 40 題</label>
+                    <label class="radio-label"><input type="radio" name="count_mode" value="50" onchange="toggleCustomInput();updateQuestionCount()"> 50 題</label>
                     <label class="radio-label">
-                        <input type="radio" name="count_mode" value="30" checked
-                               onchange="toggleCustomInput();updateQuestionCount()"> 30 題
-                    </label>
-                    <label class="radio-label">
-                        <input type="radio" name="count_mode" value="40"
-                               onchange="toggleCustomInput();updateQuestionCount()"> 40 題
-                    </label>
-                    <label class="radio-label">
-                        <input type="radio" name="count_mode" value="50"
-                               onchange="toggleCustomInput();updateQuestionCount()"> 50 題
-                    </label>
-                    <label class="radio-label">
-                        <input type="radio" name="count_mode" value="custom"
-                               onchange="toggleCustomInput();updateQuestionCount()">
-                        自訂:
-                        <input type="number" id="customCount" class="custom-input"
-                               value="100" min="1" disabled
-                               onclick="selectCustomMode(event)" oninput="updateQuestionCount()"> 題
+                        <input type="radio" name="count_mode" value="custom" onchange="toggleCustomInput();updateQuestionCount()">
+                        自訂: <input type="number" id="customCount" class="custom-input" value="100" min="1" disabled onclick="selectCustomMode(event)" oninput="updateQuestionCount()"> 題
                     </label>
                 </div>
                 <p id="totalCountText" class="info-text"></p>
@@ -418,7 +235,7 @@
     </div>
 </div>
 
-<!-- ── QUIZ ── -->
+<!-- ══ QUIZ ══ -->
 <div id="page-quiz" class="page">
     <div class="quiz-header">
         <div class="quiz-header-left">
@@ -434,7 +251,7 @@
     </div>
 </div>
 
-<!-- ── RESULT ── -->
+<!-- ══ RESULT ══ -->
 <div id="page-result" class="page">
     <div class="container">
         <div class="header">
@@ -447,11 +264,7 @@
         </div>
         <h2 class="result-section-title">詳細結果</h2>
         <table class="result-table">
-            <thead>
-                <tr>
-                    <th>題號</th><th>單字</th><th>詞性</th><th>中文解釋</th>
-                </tr>
-            </thead>
+            <thead><tr><th>題號</th><th>單字</th><th>詞性</th><th>中文解釋</th></tr></thead>
             <tbody id="resultBody"></tbody>
         </table>
         <div class="button-group">
@@ -461,26 +274,43 @@
 </div>
 
 <script>
-// ── State ────────────────────────────────────────────────────────────
+// ── State ──────────────────────────────────────────────────────────────────
 const STATE = {
-    banks: {},          // { name: [{ word, pos, meaning, _source }, ...] }
-    quizQuestions: [],  // [{ word, pos, meaning, _source, mode }, ...]
+    banks: {},          // { name: [{word, pos, meaning, _source}, ...] }
+    quizQuestions: [],  // [{word, pos, meaning, _source, mode}, ...]
     quizStartTime: 0,
     lastActivity: 0,
-    INACTIVITY_MS: 30 * 60 * 1000,
+    INACTIVITY_MS: 30 * 60 * 1000
 };
 
-// 從 sessionStorage 還原題庫與最後操作時間（重新整理後仍保留）
-(function restoreSession() {
-    try {
-        const saved = sessionStorage.getItem('vts_banks');
-        const ts    = sessionStorage.getItem('vts_last_activity');
-        if (saved) STATE.banks = JSON.parse(saved);
-        if (ts)    STATE.lastActivity = parseInt(ts);
-    } catch (e) { /* 解析失敗就從空白開始 */ }
-})();
+// ── Persistence helpers ────────────────────────────────────────────────────
+const LS_BANKS_KEY    = 'vts_banks';
+const LS_ACTIVITY_KEY = 'vts_last_activity';
 
-// ── Theme ────────────────────────────────────────────────────────────
+function saveBanks() {
+    try {
+        localStorage.setItem(LS_BANKS_KEY, JSON.stringify(STATE.banks));
+        localStorage.setItem(LS_ACTIVITY_KEY, String(Date.now()));
+    } catch(e) {}
+}
+
+function loadBanks() {
+    try {
+        const lastActivity = parseInt(localStorage.getItem(LS_ACTIVITY_KEY) || '0');
+        if (lastActivity > 0 && Date.now() - lastActivity >= STATE.INACTIVITY_MS) {
+            localStorage.removeItem(LS_BANKS_KEY);
+            localStorage.removeItem(LS_ACTIVITY_KEY);
+            return;
+        }
+        const raw = localStorage.getItem(LS_BANKS_KEY);
+        if (raw) {
+            STATE.banks = JSON.parse(raw);
+            STATE.lastActivity = lastActivity || Date.now();
+        }
+    } catch(e) {}
+}
+
+// ── Theme ──────────────────────────────────────────────────────────────────
 function toggleTheme() {
     const html = document.documentElement;
     const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
@@ -489,37 +319,38 @@ function toggleTheme() {
 }
 document.documentElement.setAttribute('data-theme', localStorage.getItem('theme') || 'dark');
 
-// ── Routing ──────────────────────────────────────────────────────────
+// ── Init ────────────────────────────────────────────────────────────────────
+loadBanks();
+renderBankList();
+
+// ── Page routing ───────────────────────────────────────────────────────────
 function showPage(name) {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.getElementById('page-' + name).classList.add('active');
     window.scrollTo(0, 0);
 }
 
-// ── Inactivity auto-clear ─────────────────────────────────────────────
+// ── Inactivity clear ───────────────────────────────────────────────────────
 function updateActivity() {
     STATE.lastActivity = Date.now();
-    sessionStorage.setItem('vts_last_activity', STATE.lastActivity);
-}
-
-function saveBanks() {
-    sessionStorage.setItem('vts_banks', JSON.stringify(STATE.banks));
+    try { localStorage.setItem(LS_ACTIVITY_KEY, String(STATE.lastActivity)); } catch(e) {}
 }
 
 setInterval(() => {
-    const hasBanks   = Object.keys(STATE.banks).length > 0;
-    const isInactive = Date.now() - STATE.lastActivity >= STATE.INACTIVITY_MS;
-    if (STATE.lastActivity > 0 && hasBanks && isInactive) {
-        STATE.banks = {};
-        STATE.lastActivity = 0;
-        sessionStorage.removeItem('vts_banks');
-        sessionStorage.removeItem('vts_last_activity');
-        renderBankList();
-        showMessage('閒置超過 30 分鐘，題庫已自動清除');
+    if (Object.keys(STATE.banks).length > 0) {
+        const last = parseInt(localStorage.getItem(LS_ACTIVITY_KEY) || '0');
+        if (last > 0 && Date.now() - last >= STATE.INACTIVITY_MS) {
+            STATE.banks = {};
+            STATE.lastActivity = 0;
+            localStorage.removeItem(LS_BANKS_KEY);
+            localStorage.removeItem(LS_ACTIVITY_KEY);
+            renderBankList();
+            showMessage('閒置超過 30 分鐘，題庫已自動清除');
+        }
     }
-}, 60_000);
+}, 60000);
 
-// ── Message ──────────────────────────────────────────────────────────
+// ── Message ────────────────────────────────────────────────────────────────
 function showMessage(text) {
     const el = document.getElementById('message');
     el.textContent = text;
@@ -527,87 +358,63 @@ function showMessage(text) {
     setTimeout(() => el.classList.remove('show'), 5000);
 }
 
-// ── Utilities ────────────────────────────────────────────────────────
+// ── HTML escape ────────────────────────────────────────────────────────────
 function h(s) {
     return String(s)
         .replace(/&/g, '&amp;').replace(/</g, '&lt;')
         .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
-function shuffle(arr) {
-    for (let i = arr.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [arr[i], arr[j]] = [arr[j], arr[i]];
-    }
-    return arr;
-}
-
-function setsEqual(a, b) {
-    return a.size === b.size && [...a].every(x => b.has(x));
-}
-
-// ── TXT Parser ───────────────────────────────────────────────────────
+// ── TXT Parser ─────────────────────────────────────────────────────────────
 function parseTxt(text) {
+    const lines = text.split(/\r?\n/);
     const questions = [];
-    const lines     = text.split(/\r?\n/);
     let volume = '', lesson = '';
 
-    // 偵測格式：
-    //   格式A（1-1.txt）：第一行含 \d+-\d+，單元行含 L\d+（如「核心單字L1」）
-    //   格式B（10月雜誌.txt）：第一行是標題文字，單元行是 W\d+（如「W1」）
-    // 取第一個非空行作為 volume 的初始判斷
     for (const raw of lines) {
         const line = raw.trim();
         if (!line) continue;
-
         const parts = line.split('\t');
         if (parts.length >= 3 && parts[0].trim() && parts[2].trim()) {
-            // 資料列：word \t pos \t meaning
             questions.push({
                 word:    parts[0].trim(),
                 pos:     parts[1].trim(),
                 meaning: parts[2].trim(),
-                _source: (volume + (lesson ? ' ' + lesson : '')).trim(),
+                _source: (volume + (lesson ? ' ' + lesson : '')).trim()
             });
         } else {
-            // 元資料列：嘗試解析 volume 或 lesson
-
-            // Volume：格式A → "1-1（...）" 取 \d+-\d+
-            //         格式B → "10月雜誌" 等標題行（檔案最開頭，尚無 volume 時）
+            // Format 1: "3-3（260115）" → volume = "3-3"
             if (!volume) {
-                const fmtA = line.match(/^(\d+-\d+)/);
-                if (fmtA) {
-                    volume = fmtA[1];
-                } else if (!/\t/.test(line)) {
-                    // 第一個非資料、非 tab 的行視為標題
-                    volume = line;
-                }
+                const vm = line.match(/^(\d+-\d+)/);
+                if (vm) { volume = vm[1]; lesson = ''; continue; }
             }
-
-            // Lesson：格式A → 行內含 L\d+（如「核心單字L1」）
-            //         格式B → 獨立的 W\d+（整行就是「W1」之類）
-            const lessonA = line.match(/L(\d+)/);
-            const lessonB = line.match(/^(W\d+)$/);
-            if (lessonA)      lesson = 'L' + lessonA[1];
-            else if (lessonB) lesson = lessonB[1];
+            // Format 2: "10月雜誌" → volume = "10月雜誌"
+            if (!volume) {
+                const mm = line.match(/^(\d+月雜誌)/);
+                if (mm) { volume = mm[1]; lesson = ''; continue; }
+            }
+            // Format 1 lesson: "核心單字L17" → lesson = "L17"
+            const lm = line.match(/L(\d+)/);
+            if (lm) { lesson = 'L' + lm[1]; continue; }
+            // Format 2 lesson: "W1" or "W2" (standalone line) → lesson = "W1"
+            const wm = line.match(/^(W\d+)$/);
+            if (wm) { lesson = wm[1]; continue; }
         }
     }
     return questions;
 }
 
-// ── Upload ───────────────────────────────────────────────────────────
+// ── Upload ─────────────────────────────────────────────────────────────────
 async function uploadBanks(event) {
     const files = Array.from(event.target.files);
     if (!files.length) return;
-
     let loaded = 0;
     for (const file of files) {
         const text = await file.text();
         const name = file.name.replace(/\.txt$/i, '');
-        const qs   = parseTxt(text);
+        const qs = parseTxt(text);
         if (qs.length > 0) { STATE.banks[name] = qs; loaded++; }
     }
-
     updateActivity();
     saveBanks();
     renderBankList();
@@ -615,10 +422,10 @@ async function uploadBanks(event) {
     event.target.value = '';
 }
 
-// ── Bank list UI ─────────────────────────────────────────────────────
+// ── Render bank list ───────────────────────────────────────────────────────
 function renderBankList() {
-    const names   = Object.keys(STATE.banks);
-    const listEl  = document.getElementById('bankList');
+    const names = Object.keys(STATE.banks);
+    const listEl = document.getElementById('bankList');
     const setupEl = document.getElementById('quizSetup');
     const cbGroup = document.getElementById('bankCheckboxGroup');
 
@@ -629,19 +436,20 @@ function renderBankList() {
     }
 
     listEl.innerHTML = names.map(name => `
-        <div class="bank-list" style="display:grid;gap:10px;"></div>
+        <div class="bank-list" style="display:grid;gap:10px;">
+        </div>
         <div class="bank-item">
             <span>${h(name)} (${STATE.banks[name].length} 題)</span>
             <button class="btn btn-danger" onclick="deleteBank(${JSON.stringify(name)})">刪除</button>
-        </div>
-    `).join('');
+        </div>`
+    ).join('');
 
     cbGroup.innerHTML = names.map(name => `
         <label class="checkbox-label">
             <input type="checkbox" name="bank" value="${h(name)}" onchange="onBankCheckChange(this)">
             ${h(name)} (${STATE.banks[name].length} 題)
-        </label>
-    `).join('');
+        </label>`
+    ).join('');
 
     setupEl.style.display = 'block';
     toggleCustomInput();
@@ -661,16 +469,12 @@ function onBankCheckChange(cb) {
     updateQuestionCount();
 }
 
-function getSelectedBankNames() {
-    return Array.from(document.querySelectorAll('input[name="bank"]:checked')).map(cb => cb.value);
-}
-
-// ── Count / mode UI ──────────────────────────────────────────────────
+// ── Count / mode UI ────────────────────────────────────────────────────────
 function toggleCustomInput() {
     const r = document.querySelector('input[name="count_mode"][value="custom"]');
     const i = document.getElementById('customCount');
     if (!i) return;
-    r?.checked ? i.removeAttribute('disabled') : i.setAttribute('disabled', 'disabled');
+    r && r.checked ? i.removeAttribute('disabled') : i.setAttribute('disabled', 'disabled');
 }
 
 function selectCustomMode(e) {
@@ -682,44 +486,53 @@ function selectCustomMode(e) {
 
 function updateQuestionCount() {
     const selected = getSelectedBankNames();
-    const el       = document.getElementById('totalCountText');
+    const el = document.getElementById('totalCountText');
     if (!el) return;
     if (!selected.length) { el.textContent = ''; return; }
-
-    const total  = selected.reduce((s, n) => s + (STATE.banks[n]?.length || 0), 0);
-    const mode   = document.querySelector('input[name="count_mode"]:checked')?.value || '30';
-    const raw    = mode === 'custom'
-        ? parseInt(document.getElementById('customCount').value) || 0
-        : parseInt(mode);
-    const actual = Math.min(raw, total);
-
+    const total = selected.reduce((s, n) => s + (STATE.banks[n]?.length || 0), 0);
+    const mode = document.querySelector('input[name="count_mode"]:checked')?.value || '30';
+    const actual = mode === 'custom'
+        ? Math.min(parseInt(document.getElementById('customCount').value) || 0, total)
+        : Math.min(parseInt(mode), total);
     el.textContent = `已選題庫總題數: ${total} 題 → 將抽取 ${actual} 題`;
 }
 
-// ── Start quiz ───────────────────────────────────────────────────────
+function getSelectedBankNames() {
+    return Array.from(document.querySelectorAll('input[name="bank"]:checked')).map(cb => cb.value);
+}
+
+// ── Start quiz ─────────────────────────────────────────────────────────────
+function shuffle(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+}
+
 function startQuiz() {
     const selected = getSelectedBankNames();
     if (!selected.length) { showMessage('請至少選擇一個題庫'); return; }
 
-    const countMode = document.querySelector('input[name="count_mode"]:checked')?.value || '30';
-    const testMode  = document.querySelector('input[name="test_mode"]:checked')?.value  || 'A';
+    const mode = document.querySelector('input[name="count_mode"]:checked')?.value || '30';
+    const testMode = document.querySelector('input[name="test_mode"]:checked')?.value || 'A';
 
     let all = [];
     for (const n of selected) if (STATE.banks[n]) all = all.concat(STATE.banks[n]);
 
     let count;
-    if (countMode === 'custom') {
+    if (mode === 'custom') {
         count = parseInt(document.getElementById('customCount').value);
         if (isNaN(count) || count < 1) { showMessage('請輸入有效的題數（至少 1 題）'); return; }
         count = Math.min(count, all.length);
     } else {
-        count = Math.min(parseInt(countMode), all.length);
+        count = Math.min(parseInt(mode), all.length);
     }
 
     shuffle(all);
     STATE.quizQuestions = all.slice(0, count).map(q => ({
         ...q,
-        mode: testMode === 'C' ? (Math.random() < 0.5 ? 'A' : 'B') : testMode,
+        mode: testMode === 'C' ? (Math.random() < 0.5 ? 'A' : 'B') : testMode
     }));
     STATE.quizStartTime = Date.now();
     updateActivity();
@@ -727,7 +540,7 @@ function startQuiz() {
     showPage('quiz');
 }
 
-// ── Render quiz ──────────────────────────────────────────────────────
+// ── Render quiz ────────────────────────────────────────────────────────────
 function renderQuiz() {
     const qs = STATE.quizQuestions;
     document.getElementById('quizProgressInfo').textContent = `共 ${qs.length} 題`;
@@ -736,107 +549,91 @@ function renderQuiz() {
 
 function buildQuestionCard(q, i) {
     const srcParts = (q._source || '').split(' ');
-    const srcHtml  = q._source
+    const srcHtml = q._source
         ? `<span class="question-source">${h(srcParts[0])}${srcParts[1] ? ' ' + h(srcParts[1]) : ''}</span>`
         : '';
-    return q.mode === 'A' ? buildCardA(q, i, srcHtml) : buildCardB(q, i, srcHtml);
-}
 
-// Mode A: 顯示單字，填入詞性 + 中文解釋
-function buildCardA(q, i, srcHtml) {
-    const posInputs = q.pos.split('&').map((_, j) =>
-        `${j > 0 ? '<span class="separator">&amp;</span>' : ''}` +
-        `<input type="text" class="input-field input-small" data-q="${i}" data-field="pos" data-idx="${j}" placeholder="詞性 ${j + 1}" autocomplete="off">`
-    ).join('');
-
-    let mIdx = 0;
-    const meaningRows = q.meaning.split('&').map((part, pi) => {
-        const inputs = part.split('、').map((_, si) => {
-            const idx = mIdx++;
-            return `${si > 0 ? '<span class="separator">、</span>' : ''}` +
-                `<input type="text" class="input-field input-small" data-q="${i}" data-field="meaning" data-idx="${idx}" placeholder="解釋 ${idx + 1}" autocomplete="off">`;
-        }).join('');
-        return `<div class="input-row">${pi > 0 ? '<span class="separator">&amp;</span>' : ''}${inputs}</div>`;
-    }).join('');
-
-    return `
-        <div class="question-card" data-mode="A">
-            <div class="question-header">
-                <span class="question-number">第 ${i + 1} 題</span>${srcHtml}
-            </div>
-            <div class="question-content">
-                <div class="field-group">
-                    <div class="field-label">單字</div>
-                    <div class="field-content"><span class="word-display">${h(q.word)}</span></div>
-                </div>
-                <div class="field-group">
-                    <div class="field-label">詞性</div>
-                    <div class="field-content"><div class="input-group"><div class="input-row">${posInputs}</div></div></div>
-                </div>
-                <div class="field-group">
-                    <div class="field-label">中文解釋</div>
-                    <div class="field-content"><div class="input-group">${meaningRows}</div></div>
-                </div>
-            </div>
-        </div>`;
-}
-
-// Mode B: 顯示詞性 + 中文解釋，填入單字
-function buildCardB(q, i, srcHtml) {
-    const posHtml = q.pos.split('&').map((p, j) =>
-        `${j > 0 ? '<span class="separator">&amp;</span>' : ''}<span>${h(p.trim())}</span>`
-    ).join('');
-
-    const meaningHtml = q.meaning.split('&').map((part, pi) => {
-        const subs = part.split('、').map((s, si) =>
-            `${si > 0 ? '<span class="separator">、</span>' : ''}<span>${h(s.trim())}</span>`
+    if (q.mode === 'A') {
+        // Word shown, fill pos + meaning
+        const posList = q.pos.split('&');
+        const posInputs = posList.map((_, j) =>
+            `${j > 0 ? '<span class="separator">&amp;</span>' : ''}` +
+            `<input type="text" class="input-field input-small" data-q="${i}" data-field="pos" data-idx="${j}" placeholder="詞性 ${j+1}" autocomplete="off">`
         ).join('');
-        return `<div class="input-row">${pi > 0 ? '<span class="separator">&amp;</span>' : ''}${subs}</div>`;
-    }).join('');
 
-    return `
-        <div class="question-card" data-mode="B">
+        const parts = q.meaning.split('&');
+        let mIdx = 0;
+        const meaningRows = parts.map((part, pi) => {
+            const subs = part.split('、');
+            const inputs = subs.map((_, si) => {
+                const idx = mIdx++;
+                return `${si > 0 ? '<span class="separator">、</span>' : ''}` +
+                    `<input type="text" class="input-field input-small" data-q="${i}" data-field="meaning" data-idx="${idx}" placeholder="解釋 ${idx+1}" autocomplete="off">`;
+            }).join('');
+            return `<div class="input-row">${pi > 0 ? '<span class="separator">&amp;</span>' : ''}${inputs}</div>`;
+        }).join('');
+
+        return `<div class="question-card" data-mode="A">
             <div class="question-header">
-                <span class="question-number">第 ${i + 1} 題</span>${srcHtml}
+                <span class="question-number">第 ${i+1} 題</span>${srcHtml}
             </div>
             <div class="question-content">
-                <div class="field-group">
-                    <div class="field-label">單字</div>
+                <div class="field-group"><div class="field-label">單字</div>
+                    <div class="field-content"><span class="word-display">${h(q.word)}</span></div></div>
+                <div class="field-group"><div class="field-label">詞性</div>
+                    <div class="field-content"><div class="input-group"><div class="input-row">${posInputs}</div></div></div></div>
+                <div class="field-group"><div class="field-label">中文解釋</div>
+                    <div class="field-content"><div class="input-group">${meaningRows}</div></div></div>
+            </div></div>`;
+    } else {
+        // Fill word, pos + meaning shown
+        const posHtml = q.pos.split('&').map((p, j) =>
+            `${j > 0 ? '<span class="separator">&amp;</span>' : ''}<span>${h(p.trim())}</span>`
+        ).join('');
+        const meaningHtml = q.meaning.split('&').map((part, pi) => {
+            const subs = part.split('、').map((s, si) =>
+                `${si > 0 ? '<span class="separator">、</span>' : ''}<span>${h(s.trim())}</span>`
+            ).join('');
+            return `<div class="input-row">${pi > 0 ? '<span class="separator">&amp;</span>' : ''}${subs}</div>`;
+        }).join('');
+
+        return `<div class="question-card" data-mode="B">
+            <div class="question-header">
+                <span class="question-number">第 ${i+1} 題</span>${srcHtml}
+            </div>
+            <div class="question-content">
+                <div class="field-group"><div class="field-label">單字</div>
                     <div class="field-content">
                         <input type="text" class="input-field" data-q="${i}" data-field="word" placeholder="輸入單字拼寫" autocomplete="off">
-                    </div>
-                </div>
-                <div class="field-group">
-                    <div class="field-label">詞性</div>
-                    <div class="field-content"><div class="input-row">${posHtml}</div></div>
-                </div>
-                <div class="field-group">
-                    <div class="field-label">中文解釋</div>
-                    <div class="field-content"><div class="input-group">${meaningHtml}</div></div>
-                </div>
-            </div>
-        </div>`;
+                    </div></div>
+                <div class="field-group"><div class="field-label">詞性</div>
+                    <div class="field-content"><div class="input-row">${posHtml}</div></div></div>
+                <div class="field-group"><div class="field-label">中文解釋</div>
+                    <div class="field-content"><div class="input-group">${meaningHtml}</div></div></div>
+            </div></div>`;
+    }
 }
 
-// ── Submit quiz ──────────────────────────────────────────────────────
+// ── Submit quiz ────────────────────────────────────────────────────────────
 function submitQuiz() {
-    const qs        = STATE.quizQuestions;
+    const qs = STATE.quizQuestions;
     const totalTime = Math.round((Date.now() - STATE.quizStartTime) / 1000);
-    const cards     = document.getElementById('quizBody').querySelectorAll('.question-card');
-    const results   = [];
+    const cards = document.getElementById('quizBody').querySelectorAll('.question-card');
+    const results = [];
     let correctCount = 0;
 
     qs.forEach((q, i) => {
         const card = cards[i];
         if (q.mode === 'A') {
-            const userPosList     = Array.from(card.querySelectorAll('input[data-field="pos"]')).map(el => el.value.trim());
+            const userPosList    = Array.from(card.querySelectorAll('input[data-field="pos"]')).map(el => el.value.trim());
             const userMeaningList = Array.from(card.querySelectorAll('input[data-field="meaning"]')).map(el => el.value.trim());
-            const correct = checkModeA(q, userPosList, userMeaningList);
+            const correct = checkA(q, userPosList, userMeaningList);
             if (correct) correctCount++;
             results.push({ mode: 'A', question: q, userPosList, userMeaningList, correct, source: q._source || '' });
         } else {
-            const userWord = card.querySelector('input[data-field="word"]')?.value.trim() ?? '';
-            const correct  = q.word.trim().toLowerCase() === userWord.toLowerCase();
+            const wordEl = card.querySelector('input[data-field="word"]');
+            const userWord = wordEl ? wordEl.value.trim() : '';
+            const correct = q.word.trim().toLowerCase() === userWord.toLowerCase();
             if (correct) correctCount++;
             results.push({ mode: 'B', question: q, userWord, correct, source: q._source || '' });
         }
@@ -847,46 +644,47 @@ function submitQuiz() {
     showPage('result');
 }
 
-function checkModeA(q, userPosList, userMeaningList) {
-    const correctPos     = new Set(q.pos.split('&').map(p => p.trim()).filter(Boolean));
+function checkA(q, userPosList, userMeaningList) {
+    const setEq = (a, b) => a.size === b.size && [...a].every(x => b.has(x));
+    const correctPos = new Set(q.pos.split('&').map(p => p.trim()).filter(Boolean));
     const correctMeaning = new Set(q.meaning.split('&').map(m => m.trim()).filter(Boolean));
-    const userPos        = new Set(userPosList.filter(Boolean));
-    const userMeaning    = new Set(userMeaningList.filter(Boolean));
-    return setsEqual(userPos, correctPos) && setsEqual(userMeaning, correctMeaning);
+    const userPos     = new Set(userPosList.filter(Boolean));
+    const userMeaning = new Set(userMeaningList.filter(Boolean));
+    return setEq(userPos, correctPos) && setEq(userMeaning, correctMeaning);
 }
 
-// ── Render result ────────────────────────────────────────────────────
+// ── Render result ──────────────────────────────────────────────────────────
 function renderResult(results, correctCount, totalTime) {
-    const total    = results.length;
-    const accuracy = total > 0 ? (correctCount / total * 100).toFixed(1) : '0.0';
-    const mm       = Math.floor(totalTime / 60);
-    const ss       = String(totalTime % 60).padStart(2, '0');
+    const total = results.length;
+    const acc = total > 0 ? (correctCount / total * 100).toFixed(1) : '0.0';
+    const mm = Math.floor(totalTime / 60);
+    const ss = String(totalTime % 60).padStart(2, '0');
 
     document.getElementById('statsGrid').innerHTML = `
-        <div class="stat-item"><div class="stat-value">${total}</div>               <div class="stat-label">總題數</div></div>
-        <div class="stat-item"><div class="stat-value">${correctCount}</div>        <div class="stat-label">答對</div></div>
+        <div class="stat-item"><div class="stat-value">${total}</div><div class="stat-label">總題數</div></div>
+        <div class="stat-item"><div class="stat-value">${correctCount}</div><div class="stat-label">答對</div></div>
         <div class="stat-item"><div class="stat-value">${total - correctCount}</div><div class="stat-label">答錯</div></div>
-        <div class="stat-item"><div class="stat-value">${accuracy}%</div>           <div class="stat-label">正確率</div></div>
-        <div class="stat-item"><div class="stat-value">${mm}:${ss}</div>            <div class="stat-label">答題時間</div></div>
-    `;
+        <div class="stat-item"><div class="stat-value">${acc}%</div><div class="stat-label">正確率</div></div>
+        <div class="stat-item"><div class="stat-value">${mm}:${ss}</div><div class="stat-label">答題時間</div></div>`;
+
     document.getElementById('resultBody').innerHTML = results.map((r, i) => buildResultRow(r, i)).join('');
 }
 
 function buildResultRow(r, i) {
-    const q   = r.question;
-    const cls = r.correct ? 'correct' : 'incorrect';
+    const q = r.question;
+    const ok = r.correct;
+    const cls = ok ? 'correct' : 'incorrect';
 
     const srcParts = (r.source || '').split(' ');
-    const srcHtml  = r.source
+    const srcHtml = r.source
         ? `<span class="num-bottom">${h(srcParts[0])}${srcParts[1] ? '<br>' + h(srcParts[1]) : ''}</span>`
         : '';
 
-    // Helpers for rendering pos/meaning as spans
-    const posSpans = str => str.split('&').map((p, j) =>
+    const posSpans = s => s.split('&').map((p, j) =>
         `${j > 0 ? '<span class="separator">&amp;</span>' : ''}<span>${h(p.trim())}</span>`
     ).join('');
 
-    const meaningSpans = str => str.split('&').map((part, pi) => {
+    const meaningSpans = s => s.split('&').map((part, pi) => {
         const inner = part.split('、').map((m, si) =>
             `${si > 0 ? '<span class="separator">、</span>' : ''}<span>${h(m.trim())}</span>`
         ).join('');
@@ -895,19 +693,15 @@ function buildResultRow(r, i) {
 
     let userWordCell, userPosCell, userMeaningCell;
     if (r.mode === 'A') {
-        userWordCell = `<span class="word-display">${h(q.word)}</span>`;
-
-        userPosCell = r.userPosList?.length
-            ? `<div class="answer-display">${r.userPosList.map((p, j) =>
-                `${j > 0 ? '<span class="separator">&amp;</span>' : ''}<span>${h(p || '(未填寫)')}</span>`
-              ).join('')}</div>`
-            : '<span>(未填寫)</span>';
-
-        userMeaningCell = r.userMeaningList?.length
-            ? `<div class="answer-display">${r.userMeaningList.map((m, j) =>
-                `${j > 0 ? '<span class="separator">、</span>' : ''}<span>${h(m || '(未填寫)')}</span>`
-              ).join('')}</div>`
-            : '<span>(未填寫)</span>';
+        userWordCell    = `<span class="word-display">${h(q.word)}</span>`;
+        userPosCell     = `<div class="answer-display">${
+            r.userPosList?.length
+                ? r.userPosList.map((p, j) => `${j > 0 ? '<span class="separator">&amp;</span>' : ''}<span>${h(p || '(未填寫)')}</span>`).join('')
+                : '<span>(未填寫)</span>'}</div>`;
+        userMeaningCell = `<div class="answer-display">${
+            r.userMeaningList?.length
+                ? r.userMeaningList.map((m, j) => `${j > 0 ? '<span class="separator">、</span>' : ''}<span>${h(m || '(未填寫)')}</span>`).join('')
+                : '<span>(未填寫)</span>'}</div>`;
     } else {
         userWordCell    = `<span class="word-display">${h(r.userWord || '(未填寫)')}</span>`;
         userPosCell     = `<div class="answer-display">${posSpans(q.pos)}</div>`;
@@ -918,7 +712,7 @@ function buildResultRow(r, i) {
         <tr class="user-answer-row">
             <td class="question-num" rowspan="2">
                 <div class="question-num-inner">
-                    <span class="num-top">${i + 1}</span>${srcHtml}
+                    <span class="num-top">${i+1}</span>${srcHtml}
                 </div>
             </td>
             <td class="word-cell">${userWordCell}</td>
@@ -931,12 +725,9 @@ function buildResultRow(r, i) {
             <td class="meaning-cell"><div class="answer-display">${meaningSpans(q.meaning)}</div></td>
         </tr>
         <tr>
-            <td colspan="4" class="status-cell ${cls}">${r.correct ? '✓ 正確' : '✗ 錯誤'}</td>
+            <td colspan="4" class="status-cell ${cls}">${ok ? '✓ 正確' : '✗ 錯誤'}</td>
         </tr>`;
 }
-
-// 頁面載入後還原並渲染題庫清單
-renderBankList();
 </script>
 </body>
 </html>
