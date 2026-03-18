@@ -283,7 +283,7 @@ const STATE = {
     INACTIVITY_MS: 30 * 60 * 1000
 };
 
-// ── Persistence helpers ────────────────────────────────────────────────────
+// ── Persistence ────────────────────────────────────────────────────────────
 const LS_BANKS_KEY    = 'vts_banks';
 const LS_ACTIVITY_KEY = 'vts_last_activity';
 
@@ -296,8 +296,8 @@ function saveBanks() {
 
 function loadBanks() {
     try {
-        const lastActivity = parseInt(localStorage.getItem(LS_ACTIVITY_KEY) || '0');
-        if (lastActivity > 0 && Date.now() - lastActivity >= STATE.INACTIVITY_MS) {
+        const last = parseInt(localStorage.getItem(LS_ACTIVITY_KEY) || '0');
+        if (last > 0 && Date.now() - last >= STATE.INACTIVITY_MS) {
             localStorage.removeItem(LS_BANKS_KEY);
             localStorage.removeItem(LS_ACTIVITY_KEY);
             return;
@@ -305,7 +305,7 @@ function loadBanks() {
         const raw = localStorage.getItem(LS_BANKS_KEY);
         if (raw) {
             STATE.banks = JSON.parse(raw);
-            STATE.lastActivity = lastActivity || Date.now();
+            STATE.lastActivity = last || Date.now();
         }
     } catch(e) {}
 }
@@ -318,8 +318,6 @@ function toggleTheme() {
     localStorage.setItem('theme', next);
 }
 document.documentElement.setAttribute('data-theme', localStorage.getItem('theme') || 'dark');
-
-// ── Init ────────────────────────────────────────────────────────────────────
 loadBanks();
 renderBankList();
 
@@ -383,20 +381,16 @@ function parseTxt(text) {
                 _source: (volume + (lesson ? ' ' + lesson : '')).trim()
             });
         } else {
-            // Format 1: "3-3（260115）" → volume = "3-3"
-            if (!volume) {
-                const vm = line.match(/^(\d+-\d+)/);
-                if (vm) { volume = vm[1]; lesson = ''; continue; }
-            }
-            // Format 2: "10月雜誌" → volume = "10月雜誌"
-            if (!volume) {
-                const mm = line.match(/^(\d+月雜誌)/);
-                if (mm) { volume = mm[1]; lesson = ''; continue; }
-            }
-            // Format 1 lesson: "核心單字L17" → lesson = "L17"
+            // Format 1 volume: "1-1（241007）" → "1-1"
+            const vm = line.match(/^(\d+-\d+)/);
+            if (vm) { volume = vm[1]; lesson = ''; continue; }
+            // Format 2 volume: "10月雜誌" → "10月雜誌"
+            const mm = line.match(/^(\d+月雜誌)/);
+            if (mm) { volume = mm[1]; lesson = ''; continue; }
+            // Format 1 lesson: "核心單字L17" → "L17"
             const lm = line.match(/L(\d+)/);
             if (lm) { lesson = 'L' + lm[1]; continue; }
-            // Format 2 lesson: "W1" or "W2" (standalone line) → lesson = "W1"
+            // Format 2 lesson: standalone "W1", "W2"... → "W1"
             const wm = line.match(/^(W\d+)$/);
             if (wm) { lesson = wm[1]; continue; }
         }
