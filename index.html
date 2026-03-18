@@ -275,40 +275,34 @@
 
 <script>
 // ── State ──────────────────────────────────────────────────────────────────
+const INACTIVITY_MS = 30 * 60 * 1000;
+const LS_BANKS_KEY  = 'vts_banks';
+const LS_ACTIVITY_KEY = 'vts_last_activity';
+
 const STATE = {
     banks: {},          // { name: [{word, pos, meaning, _source}, ...] }
     quizQuestions: [],  // [{word, pos, meaning, _source, mode}, ...]
     quizStartTime: 0,
-    lastActivity: 0,
-    INACTIVITY_MS: 30 * 60 * 1000
 };
 
-// ── localStorage keys ──────────────────────────────────────────────────────
-const LS_BANKS         = 'vts_banks';
-const LS_LAST_ACTIVITY = 'vts_lastActivity';
-
-// ── Persistence helpers ────────────────────────────────────────────────────
+// ── Persist helpers ────────────────────────────────────────────────────────
 function saveBanks() {
     try {
-        localStorage.setItem(LS_BANKS, JSON.stringify(STATE.banks));
-        localStorage.setItem(LS_LAST_ACTIVITY, String(STATE.lastActivity));
-    } catch (e) {}
+        localStorage.setItem(LS_BANKS_KEY, JSON.stringify(STATE.banks));
+    } catch (e) { /* quota exceeded – silently ignore */ }
 }
 
-function loadBanksFromStorage() {
+function loadBanks() {
     try {
-        const last = parseInt(localStorage.getItem(LS_LAST_ACTIVITY) || '0', 10);
-        if (last > 0 && Date.now() - last >= STATE.INACTIVITY_MS) {
-            localStorage.removeItem(LS_BANKS);
-            localStorage.removeItem(LS_LAST_ACTIVITY);
-            return;
-        }
-        const raw = localStorage.getItem(LS_BANKS);
-        if (raw) {
-            STATE.banks = JSON.parse(raw);
-            STATE.lastActivity = last || Date.now();
-        }
-    } catch (e) {}
+        const raw = localStorage.getItem(LS_BANKS_KEY);
+        if (raw) STATE.banks = JSON.parse(raw);
+    } catch (e) { STATE.banks = {}; }
+}
+
+function clearBanks() {
+    STATE.banks = {};
+    localStorage.removeItem(LS_BANKS_KEY);
+    localStorage.removeItem(LS_ACTIVITY_KEY);
 }
 
 // ── Theme ──────────────────────────────────────────────────────────────────
@@ -319,8 +313,6 @@ function toggleTheme() {
     localStorage.setItem('theme', next);
 }
 document.documentElement.setAttribute('data-theme', localStorage.getItem('theme') || 'dark');
-loadBanksFromStorage();
-renderBankList();
 
 // ── Page routing ───────────────────────────────────────────────────────────
 function showPage(name) {
@@ -331,22 +323,27 @@ function showPage(name) {
 
 // ── Inactivity clear ───────────────────────────────────────────────────────
 function updateActivity() {
-    STATE.lastActivity = Date.now();
-    try { localStorage.setItem(LS_LAST_ACTIVITY, String(STATE.lastActivity)); } catch (e) {}
+    localStorage.setItem(LS_ACTIVITY_KEY, String(Date.now()));
 }
 
-setInterval(() => {
-    if (Object.keys(STATE.banks).length > 0) {
-        const last = parseInt(localStorage.getItem(LS_LAST_ACTIVITY) || '0');
-        if (last > 0 && Date.now() - last >= STATE.INACTIVITY_MS) {
-            STATE.banks = {};
-            localStorage.removeItem(LS_BANKS);
-            localStorage.removeItem(LS_LAST_ACTIVITY);
+function checkInactivity() {
+    const last = parseInt(localStorage.getItem(LS_ACTIVITY_KEY) || '0', 10);
+    if (last > 0 && Object.keys(STATE.banks).length > 0) {
+        if (Date.now() - last >= INACTIVITY_MS) {
+            clearBanks();
             renderBankList();
             showMessage('閒置超過 30 分鐘，題庫已自動清除');
         }
     }
-}, 60000);
+}
+
+// On load: restore banks then check if they have expired
+loadBanks();
+checkInactivity();
+// Render whatever survived (after possible expiry)
+document.addEventListener('DOMContentLoaded', renderBankList);
+
+setInterval(checkInactivity, 60000);
 
 // ── Message ────────────────────────────────────────────────────────────────
 function showMessage(text) {
@@ -381,22 +378,14 @@ function parseTxt(text) {
                 _source: (volume + (lesson ? ' ' + lesson : '')).trim()
             });
         } else {
-            // Format 1 volume: "1-1（241007）" → volume = "1-1"
+            // Parse volume "3-3" from lines like "3-3（260115）"
             if (!volume) {
                 const vm = line.match(/^(\d+-\d+)/);
-                if (vm) { volume = vm[1]; lesson = ''; continue; }
+                if (vm) volume = vm[1];
             }
-            // Format 2 volume: "10月雜誌" → volume = "10月雜誌"
-            if (!volume) {
-                const mm = line.match(/^(\d{1,2}月雜誌)/);
-                if (mm) { volume = mm[1]; lesson = ''; continue; }
-            }
-            // Format 1 lesson: "核心單字L17" → lesson = "L17"
+            // Parse lesson "L17" from lines like "核心單字L17"
             const lm = line.match(/L(\d+)/);
-            if (lm) { lesson = 'L' + lm[1]; continue; }
-            // Format 2 lesson: "W1", "W2" ... → lesson = "W1"
-            const wm = line.match(/W(\d+)/);
-            if (wm) { lesson = 'W' + wm[1]; continue; }
+            if (lm) lesson = 'L' + lm[1];
         }
     }
     return questions;
@@ -457,6 +446,7 @@ function renderBankList() {
 function deleteBank(name) {
     if (!confirm(`確定要刪除題庫「${name}」嗎？`)) return;
     delete STATE.banks[name];
+    updateActivity();
     saveBanks();
     renderBankList();
     showMessage(`題庫 ${name} 已刪除`);
