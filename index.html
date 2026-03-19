@@ -279,37 +279,12 @@ const STATE = {
     banks: {},          // { name: [{word, pos, meaning, _source}, ...] }
     quizQuestions: [],  // [{word, pos, meaning, _source, mode}, ...]
     quizStartTime: 0,
-    lastActivity: 0,
     INACTIVITY_MS: 30 * 60 * 1000
 };
 
-// ── localStorage keys ──────────────────────────────────────────────────────
-const LS_BANKS         = 'vts_banks';
-const LS_LAST_ACTIVITY = 'vts_lastActivity';
-
-// ── Persistence helpers ────────────────────────────────────────────────────
-function saveBanks() {
-    try {
-        localStorage.setItem(LS_BANKS, JSON.stringify(STATE.banks));
-        localStorage.setItem(LS_LAST_ACTIVITY, String(STATE.lastActivity));
-    } catch (e) {}
-}
-
-function loadBanksFromStorage() {
-    try {
-        const last = parseInt(localStorage.getItem(LS_LAST_ACTIVITY) || '0', 10);
-        if (last > 0 && Date.now() - last >= STATE.INACTIVITY_MS) {
-            localStorage.removeItem(LS_BANKS);
-            localStorage.removeItem(LS_LAST_ACTIVITY);
-            return;
-        }
-        const raw = localStorage.getItem(LS_BANKS);
-        if (raw) {
-            STATE.banks = JSON.parse(raw);
-            STATE.lastActivity = last || Date.now();
-        }
-    } catch (e) {}
-}
+// Persist lastActivity in localStorage so page refresh doesn't reset it
+function getLastActivity() { return parseInt(localStorage.getItem('vts_lastActivity') || '0'); }
+function setLastActivity(ts) { localStorage.setItem('vts_lastActivity', String(ts)); }
 
 // ── Theme ──────────────────────────────────────────────────────────────────
 function toggleTheme() {
@@ -319,8 +294,6 @@ function toggleTheme() {
     localStorage.setItem('theme', next);
 }
 document.documentElement.setAttribute('data-theme', localStorage.getItem('theme') || 'dark');
-loadBanksFromStorage();
-renderBankList();
 
 // ── Page routing ───────────────────────────────────────────────────────────
 function showPage(name) {
@@ -330,18 +303,14 @@ function showPage(name) {
 }
 
 // ── Inactivity clear ───────────────────────────────────────────────────────
-function updateActivity() {
-    STATE.lastActivity = Date.now();
-    try { localStorage.setItem(LS_LAST_ACTIVITY, String(STATE.lastActivity)); } catch (e) {}
-}
+function updateActivity() { setLastActivity(Date.now()); }
 
 setInterval(() => {
-    if (Object.keys(STATE.banks).length > 0) {
-        const last = parseInt(localStorage.getItem(LS_LAST_ACTIVITY) || '0');
-        if (last > 0 && Date.now() - last >= STATE.INACTIVITY_MS) {
+    const last = getLastActivity();
+    if (last > 0 && Object.keys(STATE.banks).length > 0) {
+        if (Date.now() - last >= STATE.INACTIVITY_MS) {
             STATE.banks = {};
-            localStorage.removeItem(LS_BANKS);
-            localStorage.removeItem(LS_LAST_ACTIVITY);
+            setLastActivity(0);
             renderBankList();
             showMessage('閒置超過 30 分鐘，題庫已自動清除');
         }
@@ -381,22 +350,22 @@ function parseTxt(text) {
                 _source: (volume + (lesson ? ' ' + lesson : '')).trim()
             });
         } else {
-            // Format 1 volume: "1-1（241007）" → volume = "1-1"
+            // Format 1: "3-3（260115）" → volume = "3-3"
             if (!volume) {
                 const vm = line.match(/^(\d+-\d+)/);
-                if (vm) { volume = vm[1]; lesson = ''; continue; }
+                if (vm) volume = vm[1];
             }
-            // Format 2 volume: "10月雜誌" → volume = "10月雜誌"
+            // Format 2: "10月雜誌" → volume = "10月雜誌"
             if (!volume) {
-                const mm = line.match(/^(\d{1,2}月雜誌)/);
-                if (mm) { volume = mm[1]; lesson = ''; continue; }
+                const mm = line.match(/^(\d+月雜誌)/);
+                if (mm) volume = mm[1];
             }
-            // Format 1 lesson: "核心單字L17" → lesson = "L17"
+            // Lesson format 1: "核心單字L17" → lesson = "L17"
             const lm = line.match(/L(\d+)/);
-            if (lm) { lesson = 'L' + lm[1]; continue; }
-            // Format 2 lesson: "W1", "W2" ... → lesson = "W1"
-            const wm = line.match(/W(\d+)/);
-            if (wm) { lesson = 'W' + wm[1]; continue; }
+            if (lm) lesson = 'L' + lm[1];
+            // Lesson format 2: "W1" / "W2" standalone → lesson = "W1"
+            const wm = line.match(/^(W\d+)\s*$/);
+            if (wm) lesson = wm[1];
         }
     }
     return questions;
@@ -414,7 +383,6 @@ async function uploadBanks(event) {
         if (qs.length > 0) { STATE.banks[name] = qs; loaded++; }
     }
     updateActivity();
-    saveBanks();
     renderBankList();
     showMessage(loaded > 0 ? `成功載入 ${loaded} 個題庫` : '檔案格式錯誤');
     event.target.value = '';
@@ -457,7 +425,6 @@ function renderBankList() {
 function deleteBank(name) {
     if (!confirm(`確定要刪除題庫「${name}」嗎？`)) return;
     delete STATE.banks[name];
-    saveBanks();
     renderBankList();
     showMessage(`題庫 ${name} 已刪除`);
 }
