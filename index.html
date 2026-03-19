@@ -276,30 +276,24 @@
 <script>
 // ── State ──────────────────────────────────────────────────────────────────
 const STATE = {
-    banks: {},          // { name: [{word, pos, meaning, _source}, ...] }
-    quizQuestions: [],  // [{word, pos, meaning, _source, mode}, ...]
+    banks: {},
+    quizQuestions: [],
     quizStartTime: 0,
     INACTIVITY_MS: 30 * 60 * 1000
 };
 
-// Persist banks in localStorage
 function saveBanks() {
     try { localStorage.setItem('vts_banks', JSON.stringify(STATE.banks)); } catch(e) {}
 }
 function loadBanks() {
-    try {
-        const raw = localStorage.getItem('vts_banks');
-        if (raw) STATE.banks = JSON.parse(raw);
-    } catch(e) { STATE.banks = {}; }
+    try { const r = localStorage.getItem('vts_banks'); if (r) STATE.banks = JSON.parse(r); } catch(e) {}
 }
-
-// Persist lastActivity in localStorage so page refresh doesn't reset it
 function getLastActivity() { return parseInt(localStorage.getItem('vts_lastActivity') || '0'); }
 function setLastActivity(ts) { localStorage.setItem('vts_lastActivity', String(ts)); }
 
-// On load: restore banks, then check if already expired
+// Restore banks on load; clear if already expired
 loadBanks();
-(function checkExpiredOnLoad() {
+(function() {
     const last = getLastActivity();
     if (last > 0 && Date.now() - last >= STATE.INACTIVITY_MS) {
         STATE.banks = {};
@@ -316,8 +310,6 @@ function toggleTheme() {
     localStorage.setItem('theme', next);
 }
 document.documentElement.setAttribute('data-theme', localStorage.getItem('theme') || 'dark');
-
-// Render restored banks on page load (after renderBankList is defined below — use defer)
 window.addEventListener('DOMContentLoaded', () => renderBankList());
 
 // ── Page routing ───────────────────────────────────────────────────────────
@@ -369,7 +361,7 @@ function parseTxt(text) {
         if (!line) continue;
         const parts = line.split('\t');
         if (parts.length >= 3 && parts[0].trim() && parts[2].trim()) {
-            const src = lesson ? volume + '\n' + lesson : volume;
+            const src = volume + (lesson ? '\n' + lesson : '');
             questions.push({
                 word:    parts[0].trim(),
                 pos:     parts[1].trim(),
@@ -377,13 +369,13 @@ function parseTxt(text) {
                 _source: src.trim()
             });
         } else {
-            // Format 1 volume: "3-3（260115）" → "3-3"
+            // Format 1 volume: "1-1（241007）" → "1-1", reset lesson
             const vm = line.match(/^(\d+-\d+)/);
             if (vm) { volume = vm[1]; lesson = ''; }
-            // Format 2 volume: "10月雜誌" (standalone line)
+            // Format 2 volume: "10月雜誌" standalone → "10月雜誌", reset lesson
             const mm = line.match(/^(\d+月雜誌)\s*$/);
             if (mm) { volume = mm[1]; lesson = ''; }
-            // Lesson format 1: "核心單字L17" → "L17"
+            // Lesson format 1: "核心單字L3" → "L3"
             const lm = line.match(/L(\d+)/);
             if (lm) lesson = 'L' + lm[1];
             // Lesson format 2: "W1" standalone → "W1"
