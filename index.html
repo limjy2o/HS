@@ -282,9 +282,31 @@ const STATE = {
     INACTIVITY_MS: 30 * 60 * 1000
 };
 
+// Persist banks in localStorage
+function saveBanks() {
+    try { localStorage.setItem('vts_banks', JSON.stringify(STATE.banks)); } catch(e) {}
+}
+function loadBanks() {
+    try {
+        const raw = localStorage.getItem('vts_banks');
+        if (raw) STATE.banks = JSON.parse(raw);
+    } catch(e) { STATE.banks = {}; }
+}
+
 // Persist lastActivity in localStorage so page refresh doesn't reset it
 function getLastActivity() { return parseInt(localStorage.getItem('vts_lastActivity') || '0'); }
 function setLastActivity(ts) { localStorage.setItem('vts_lastActivity', String(ts)); }
+
+// On load: restore banks, then check if already expired
+loadBanks();
+(function checkExpiredOnLoad() {
+    const last = getLastActivity();
+    if (last > 0 && Date.now() - last >= STATE.INACTIVITY_MS) {
+        STATE.banks = {};
+        saveBanks();
+        setLastActivity(0);
+    }
+})();
 
 // ── Theme ──────────────────────────────────────────────────────────────────
 function toggleTheme() {
@@ -294,6 +316,9 @@ function toggleTheme() {
     localStorage.setItem('theme', next);
 }
 document.documentElement.setAttribute('data-theme', localStorage.getItem('theme') || 'dark');
+
+// Render restored banks on page load (after renderBankList is defined below — use defer)
+window.addEventListener('DOMContentLoaded', () => renderBankList());
 
 // ── Page routing ───────────────────────────────────────────────────────────
 function showPage(name) {
@@ -310,6 +335,7 @@ setInterval(() => {
     if (last > 0 && Object.keys(STATE.banks).length > 0) {
         if (Date.now() - last >= STATE.INACTIVITY_MS) {
             STATE.banks = {};
+            saveBanks();
             setLastActivity(0);
             renderBankList();
             showMessage('閒置超過 30 分鐘，題庫已自動清除');
@@ -343,27 +369,24 @@ function parseTxt(text) {
         if (!line) continue;
         const parts = line.split('\t');
         if (parts.length >= 3 && parts[0].trim() && parts[2].trim()) {
+            const src = lesson ? volume + '\n' + lesson : volume;
             questions.push({
                 word:    parts[0].trim(),
                 pos:     parts[1].trim(),
                 meaning: parts[2].trim(),
-                _source: (volume + (lesson ? ' ' + lesson : '')).trim()
+                _source: src.trim()
             });
         } else {
-            // Format 1: "3-3（260115）" → volume = "3-3"
-            if (!volume) {
-                const vm = line.match(/^(\d+-\d+)/);
-                if (vm) volume = vm[1];
-            }
-            // Format 2: "10月雜誌" → volume = "10月雜誌"
-            if (!volume) {
-                const mm = line.match(/^(\d+月雜誌)/);
-                if (mm) volume = mm[1];
-            }
-            // Lesson format 1: "核心單字L17" → lesson = "L17"
+            // Format 1 volume: "3-3（260115）" → "3-3"
+            const vm = line.match(/^(\d+-\d+)/);
+            if (vm) { volume = vm[1]; lesson = ''; }
+            // Format 2 volume: "10月雜誌" (standalone line)
+            const mm = line.match(/^(\d+月雜誌)\s*$/);
+            if (mm) { volume = mm[1]; lesson = ''; }
+            // Lesson format 1: "核心單字L17" → "L17"
             const lm = line.match(/L(\d+)/);
             if (lm) lesson = 'L' + lm[1];
-            // Lesson format 2: "W1" / "W2" standalone → lesson = "W1"
+            // Lesson format 2: "W1" standalone → "W1"
             const wm = line.match(/^(W\d+)\s*$/);
             if (wm) lesson = wm[1];
         }
@@ -383,6 +406,7 @@ async function uploadBanks(event) {
         if (qs.length > 0) { STATE.banks[name] = qs; loaded++; }
     }
     updateActivity();
+    saveBanks();
     renderBankList();
     showMessage(loaded > 0 ? `成功載入 ${loaded} 個題庫` : '檔案格式錯誤');
     event.target.value = '';
@@ -425,6 +449,7 @@ function renderBankList() {
 function deleteBank(name) {
     if (!confirm(`確定要刪除題庫「${name}」嗎？`)) return;
     delete STATE.banks[name];
+    saveBanks();
     renderBankList();
     showMessage(`題庫 ${name} 已刪除`);
 }
@@ -513,9 +538,9 @@ function renderQuiz() {
 }
 
 function buildQuestionCard(q, i) {
-    const srcParts = (q._source || '').split(' ');
+    const srcParts = (q._source || '').split('\n');
     const srcHtml = q._source
-        ? `<span class="question-source">${h(srcParts[0])}${srcParts[1] ? ' ' + h(srcParts[1]) : ''}</span>`
+        ? `<span class="question-source">${h(srcParts[0])}${srcParts[1] ? '<br>' + h(srcParts[1]) : ''}</span>`
         : '';
 
     if (q.mode === 'A') {
@@ -640,7 +665,7 @@ function buildResultRow(r, i) {
     const ok = r.correct;
     const cls = ok ? 'correct' : 'incorrect';
 
-    const srcParts = (r.source || '').split(' ');
+    const srcParts = (r.source || '').split('\n');
     const srcHtml = r.source
         ? `<span class="num-bottom">${h(srcParts[0])}${srcParts[1] ? '<br>' + h(srcParts[1]) : ''}</span>`
         : '';
