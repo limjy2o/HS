@@ -128,7 +128,7 @@
             margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid var(--border);
         }
         .question-number { font-size: 1.1rem; font-weight: bold; }
-        .question-source { font-size: 0.85rem; opacity: 0.5; font-family: monospace; }
+        .question-source { font-size: 0.85rem; opacity: 0.5; font-family: monospace; text-align: right; line-height: 1.4; }
         .question-content {
             display: grid; grid-template-columns: 1fr 1fr 2fr; gap: 20px; align-items: start;
         }
@@ -275,29 +275,33 @@
 
 <script>
 // ── State ──────────────────────────────────────────────────────────────────
+const INACTIVITY_MS = 30 * 60 * 1000;
+
+function loadBanks() {
+    try { return JSON.parse(localStorage.getItem('vts_banks') || '{}'); } catch { return {}; }
+}
+function saveBanks(banks) {
+    localStorage.setItem('vts_banks', JSON.stringify(banks));
+}
+function getLastActivity() {
+    return parseInt(localStorage.getItem('vts_lastActivity') || '0');
+}
+function setLastActivity(ts) {
+    localStorage.setItem('vts_lastActivity', String(ts));
+}
+
 const STATE = {
-    banks: {},
+    banks: loadBanks(),
     quizQuestions: [],
     quizStartTime: 0,
-    INACTIVITY_MS: 30 * 60 * 1000
 };
 
-function saveBanks() {
-    try { localStorage.setItem('vts_banks', JSON.stringify(STATE.banks)); } catch(e) {}
-}
-function loadBanks() {
-    try { const r = localStorage.getItem('vts_banks'); if (r) STATE.banks = JSON.parse(r); } catch(e) {}
-}
-function getLastActivity() { return parseInt(localStorage.getItem('vts_lastActivity') || '0'); }
-function setLastActivity(ts) { localStorage.setItem('vts_lastActivity', String(ts)); }
-
-// Restore banks on load; clear if already expired
-loadBanks();
+// On page load: if already expired, clear banks
 (function() {
     const last = getLastActivity();
-    if (last > 0 && Date.now() - last >= STATE.INACTIVITY_MS) {
+    if (last > 0 && Date.now() - last >= INACTIVITY_MS) {
         STATE.banks = {};
-        saveBanks();
+        saveBanks({});
         setLastActivity(0);
     }
 })();
@@ -310,7 +314,6 @@ function toggleTheme() {
     localStorage.setItem('theme', next);
 }
 document.documentElement.setAttribute('data-theme', localStorage.getItem('theme') || 'dark');
-window.addEventListener('DOMContentLoaded', () => renderBankList());
 
 // ── Page routing ───────────────────────────────────────────────────────────
 function showPage(name) {
@@ -325,9 +328,9 @@ function updateActivity() { setLastActivity(Date.now()); }
 setInterval(() => {
     const last = getLastActivity();
     if (last > 0 && Object.keys(STATE.banks).length > 0) {
-        if (Date.now() - last >= STATE.INACTIVITY_MS) {
+        if (Date.now() - last >= INACTIVITY_MS) {
             STATE.banks = {};
-            saveBanks();
+            saveBanks({});
             setLastActivity(0);
             renderBankList();
             showMessage('閒置超過 30 分鐘，題庫已自動清除');
@@ -351,34 +354,46 @@ function h(s) {
 }
 
 // ── TXT Parser ─────────────────────────────────────────────────────────────
+const MONTH_MAP = {'一':1,'二':2,'三':3,'四':4,'五':5,'六':6,'七':7,'八':8,'九':9,'十':10,'十一':11,'十二':12};
+
 function parseTxt(text) {
     const lines = text.split(/\r?\n/);
     const questions = [];
-    let volume = '', lesson = '';
+    let volume = '', lesson = '', isMagazine = false, magMonth = '';
 
     for (const raw of lines) {
         const line = raw.trim();
         if (!line) continue;
         const parts = line.split('\t');
         if (parts.length >= 3 && parts[0].trim() && parts[2].trim()) {
-            const src = volume + (lesson ? '\n' + lesson : '');
+            const src = (volume + (lesson ? ' ' + lesson : '')).trim();
+            // Result page shows "MM Wx" for magazines (MM = zero-padded month number)
+            const srcResult = isMagazine && magMonth
+                ? (magMonth + (lesson ? ' ' + lesson : '')).trim()
+                : src;
             questions.push({
-                word:    parts[0].trim(),
-                pos:     parts[1].trim(),
-                meaning: parts[2].trim(),
-                _source: src.trim()
+                word: parts[0].trim(), pos: parts[1].trim(), meaning: parts[2].trim(),
+                _source: src, _sourceResult: srcResult,
             });
         } else {
-            // Format 1 volume: "1-1（241007）" → "1-1", reset lesson
-            const vm = line.match(/^(\d+-\d+)/);
-            if (vm) { volume = vm[1]; lesson = ''; }
-            // Format 2 volume: "10月雜誌" standalone → "10月雜誌", reset lesson
-            const mm = line.match(/^(\d+月雜誌)\s*$/);
-            if (mm) { volume = mm[1]; lesson = ''; }
-            // Lesson format 1: "核心單字L3" → "L3"
-            const lm = line.match(/L(\d+)/);
+            // Format 1: "1-1（241007）"
+            const vm1 = line.match(/^(\d+-\d+)/);
+            if (vm1) { volume = vm1[1]; lesson = ''; isMagazine = false; magMonth = ''; }
+            // Format 2a: "10月雜誌" (Arabic numeral month)
+            const vm2a = line.match(/^(\d+)月雜誌/);
+            // Format 2b: "十月雜誌" (Chinese numeral month)
+            const vm2b = line.match(/^([一二三四五六七八九十]+)月雜誌/);
+            if (vm2a) {
+                magMonth = String(parseInt(vm2a[1])).padStart(2, '0');
+                volume = vm2a[1] + '月雜誌'; lesson = ''; isMagazine = true;
+            } else if (vm2b) {
+                magMonth = String(MONTH_MAP[vm2b[1]] || 0).padStart(2, '0');
+                volume = vm2b[1] + '月雜誌'; lesson = ''; isMagazine = true;
+            }
+            // Lesson "L3" from "核心單字L3"
+            const lm = line.match(/(?<![A-Za-z])L(\d+)/);
             if (lm) lesson = 'L' + lm[1];
-            // Lesson format 2: "W1" standalone → "W1"
+            // Lesson "W1" standalone
             const wm = line.match(/^(W\d+)\s*$/);
             if (wm) lesson = wm[1];
         }
@@ -398,7 +413,7 @@ async function uploadBanks(event) {
         if (qs.length > 0) { STATE.banks[name] = qs; loaded++; }
     }
     updateActivity();
-    saveBanks();
+    saveBanks(STATE.banks);
     renderBankList();
     showMessage(loaded > 0 ? `成功載入 ${loaded} 個題庫` : '檔案格式錯誤');
     event.target.value = '';
@@ -441,7 +456,7 @@ function renderBankList() {
 function deleteBank(name) {
     if (!confirm(`確定要刪除題庫「${name}」嗎？`)) return;
     delete STATE.banks[name];
-    saveBanks();
+    saveBanks(STATE.banks);
     renderBankList();
     showMessage(`題庫 ${name} 已刪除`);
 }
@@ -530,9 +545,10 @@ function renderQuiz() {
 }
 
 function buildQuestionCard(q, i) {
-    const srcParts = (q._source || '').split('\n');
-    const srcHtml = q._source
-        ? `<span class="question-source">${h(srcParts[0])}${srcParts[1] ? '<br>' + h(srcParts[1]) : ''}</span>`
+    const vol = q._vol || (q._source || '').split(' ')[0] || '';
+    const lesson = q._lesson || (q._source || '').split(' ')[1] || '';
+    const srcHtml = vol
+        ? `<span class="question-source">${h(vol)}${lesson ? '<br>' + h(lesson) : ''}</span>`
         : '';
 
     if (q.mode === 'A') {
@@ -657,9 +673,12 @@ function buildResultRow(r, i) {
     const ok = r.correct;
     const cls = ok ? 'correct' : 'incorrect';
 
-    const srcParts = (r.source || '').split('\n');
-    const srcHtml = r.source
-        ? `<span class="num-bottom">${h(srcParts[0])}${srcParts[1] ? '<br>' + h(srcParts[1]) : ''}</span>`
+    // _sourceResult = "10 W1" for magazine, "1-1 L3" for normal
+    const srcParts = (q._sourceResult || q._source || '').split(' ');
+    const line1 = srcParts[0] || '';
+    const line2 = srcParts[1] || '';
+    const srcHtml = line1
+        ? `<span class="num-bottom">${h(line1)}${line2 ? '<br>' + h(line2) : ''}</span>`
         : '';
 
     const posSpans = s => s.split('&').map((p, j) =>
@@ -710,6 +729,8 @@ function buildResultRow(r, i) {
             <td colspan="4" class="status-cell ${cls}">${ok ? '✓ 正確' : '✗ 錯誤'}</td>
         </tr>`;
 }
+// ── Init ───────────────────────────────────────────────────────────────────
+renderBankList();
 </script>
 </body>
 </html>
