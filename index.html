@@ -427,9 +427,9 @@ function parseTxt(text) {
             // Lesson "L3" from "核心單字L3" or standalone "L3"
             const lm = line.match(/(?<![A-Za-z])L(\d+)/);
             if (lm) lesson = 'L' + lm[1];
-            // Lesson "W1" standalone
-            const wm = line.match(/^(W\d+)\s*$/);
-            if (wm) lesson = wm[1];
+            // Lesson "W1" — anywhere in the line (handles "4月雜誌 W1" on same line)
+            const wm = line.match(/\bW(\d+)\b/);
+            if (wm) lesson = 'W' + wm[1];
         }
     }
     return questions;
