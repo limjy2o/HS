@@ -410,6 +410,9 @@ function parseTxt(text) {
             // Format 1: "1-1（241007）"
             const vm1 = line.match(/^(\d+-\d+)/);
             if (vm1) { volume = vm1[1]; lesson = ''; isMagazine = false; magMonth = ''; }
+            // Format 3: "Levelx" or "Level x"
+            const vm3 = line.match(/^Level\s*(\d+)/i);
+            if (vm3) { volume = 'Level' + vm3[1]; lesson = ''; isMagazine = false; magMonth = ''; }
             // Format 2a: "10月雜誌" (Arabic numeral month)
             const vm2a = line.match(/^(\d+)月雜誌/);
             // Format 2b: "十月雜誌" (Chinese numeral month)
@@ -421,7 +424,7 @@ function parseTxt(text) {
                 magMonth = String(MONTH_MAP[vm2b[1]] || 0).padStart(2, '0');
                 volume = vm2b[1] + '月雜誌'; lesson = ''; isMagazine = true;
             }
-            // Lesson "L3" from "核心單字L3"
+            // Lesson "L3" from "核心單字L3" or standalone "L3"
             const lm = line.match(/(?<![A-Za-z])L(\d+)/);
             if (lm) lesson = 'L' + lm[1];
             // Lesson "W1" standalone
@@ -584,9 +587,7 @@ function renderQuiz() {
 }
 
 function buildQuestionCard(q, i) {
-    const vol = q._vol || (q._source || '').split(' ')[0] || '';
-    const lesson = q._lesson || (q._source || '').split(' ')[1] || '';
-    const srcLabel = [vol, lesson].filter(Boolean).join(' ');
+    const srcLabel = (q._source || '').trim();
     const srcHtml = srcLabel
         ? `<span class="question-source">${h(srcLabel)}</span>`
         : '';
