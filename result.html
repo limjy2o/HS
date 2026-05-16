@@ -91,6 +91,7 @@
             min-width: 56px;
             width: 56px;
             padding: 10px 6px;
+            font-family: monospace;
         }
         .question-num-inner {
             display: flex;
@@ -107,6 +108,8 @@
             word-break: break-all;
             line-height: 1.2;
             text-align: center;
+            font-family: monospace;
+            letter-spacing: 0.03em;
         }
         .word-cell { min-width: 150px; }
         .pos-cell { min-width: 150px; }
@@ -253,6 +256,7 @@
             const numBot = document.createElement('span');
             numBot.className = 'num-bottom';
             numBot.innerHTML = srcParts.join('<br>');
+            numBot.style.cssText = 'font-size:0.85rem !important; opacity:0.5 !important; font-family:monospace !important; letter-spacing:0.03em !important; color:inherit !important; font-weight:normal !important;';
             inner.appendChild(numBot);
         }
         numTd.appendChild(inner);
