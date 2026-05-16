@@ -102,12 +102,14 @@
         }
         .num-top { font-size: 1.2rem; font-weight: bold; line-height: 1; }
         .num-bottom {
-            font-size: 0.85rem !important;
-            opacity: 0.5 !important;
-            font-family: monospace !important;
-            letter-spacing: 0.03em !important;
-            color: inherit !important;
-            font-weight: normal !important;
+            font-size: 0.7rem;
+            color: #888888;
+            font-weight: normal;
+            word-break: break-all;
+            line-height: 1.2;
+            text-align: center;
+            font-family: monospace;
+            letter-spacing: 0.03em;
         }
         .word-cell { min-width: 150px; }
         .pos-cell { min-width: 150px; }
@@ -254,6 +256,7 @@
             const numBot = document.createElement('span');
             numBot.className = 'num-bottom';
             numBot.innerHTML = srcParts.join('<br>');
+            numBot.style.cssText = 'font-size:0.85rem !important; opacity:0.5 !important; font-family:monospace !important; letter-spacing:0.03em !important; color:inherit !important; font-weight:normal !important;';
             inner.appendChild(numBot);
         }
         numTd.appendChild(inner);
